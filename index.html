@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Encuesta de Caracterización Sociolingüística 2026</title>
+<style>
+:root{--b:#0b5c8a;--l:#d4ecf7;--g:#e8eef2;--t:#1c2a33}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;font:15px/1.45 system-ui,Segoe UI,Arial,sans-serif;color:var(--t);background:#f3f6f8}
+.hd{text-align:center;padding:14px 8px 8px;background:#fff;border-bottom:4px solid var(--b);font-size:13px}
+.hd b{display:block;font-size:14px}
+h1{font-size:18px;text-align:center;margin:14px 8px;color:var(--b)}
+nav{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+nav button{padding:8px 16px;border:1px solid var(--b);background:#fff;color:var(--b);border-radius:20px;cursor:pointer;font-weight:600}
+nav button.on{background:var(--b);color:#fff}
+main{max-width:900px;margin:auto;padding:0 10px 40px}
+.card{background:#fff;border:1px solid #cfd9e0;border-radius:8px;padding:14px;margin-bottom:12px}
+.card h2{margin:-14px -14px 12px;padding:8px 14px;background:var(--l);font-size:14px;border-radius:8px 8px 0 0}
+.gr{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+label.f{display:block;font-weight:600;font-size:13px}
+input[type=text],input[type=password],input[type=date],select,textarea{width:100%;padding:8px;border:1px solid #9fb0bb;border-radius:6px;font:inherit;margin-top:3px}
+input[readonly]{background:var(--g)}
+.rg{display:flex;flex-wrap:wrap;gap:6px 14px;margin:4px 0}
+.rg label{font-weight:400;cursor:pointer;display:flex;gap:5px;align-items:flex-start}
+.q{padding:10px 0;border-bottom:1px dashed #c5d0d7}.q:last-child{border:0}
+.q>b{display:block;font-size:14px}.q .rg{flex-direction:column;margin-left:12px}
+.btn{padding:9px 16px;border:0;border-radius:6px;background:var(--b);color:#fff;font-weight:600;cursor:pointer;margin:3px 3px 3px 0}
+.btn.s{background:#51707f}.btn.r{background:#b3261e}
+.st{display:flex;justify-content:space-between;gap:8px;align-items:center;background:var(--g);padding:6px 10px;border-radius:6px;margin:4px 0;font-size:13px}
+.st button{border:0;background:none;color:#b3261e;font-size:18px;cursor:pointer}
+.note{font-size:12px;color:#5b6b75}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1c2a33;color:#fff;padding:10px 18px;border-radius:8px;z-index:9;display:none;max-width:90%}
+#ct{width:100%;border-collapse:collapse;font-size:13px}#ct td,#ct th{border-bottom:1px solid #d5dde2;padding:6px;text-align:left}#ct th{background:var(--g)}
+#pa{display:none}
+#pa{font:11px/1.35 Arial,sans-serif;color:#000}
+#pa table{width:100%;border-collapse:collapse;margin:6px 0}
+#pa td,#pa th{border:1px solid #000;padding:3px 5px;text-align:left}
+#pa th{background:#8ecae6}
+#pa .sec{background:#c9e6f4;font-weight:bold;padding:3px 5px;margin-top:8px}
+#pa .pq{margin:4px 0;page-break-inside:avoid}
+@media print{body>*:not(#pa){display:none!important}#pa{display:block}@page{margin:12mm}}
+</style></head><body>
+<header class="hd">GOBIERNO REGIONAL DE AYACUCHO<b>DIRECCIÓN REGIONAL DE EDUCACIÓN DE AYACUCHO</b>DIRECCIÓN DE GESTIÓN PEDAGÓGICA<br><b>“Año de la esperanza y fortalecimiento de la democracia”</b></header>
+<h1>ENCUESTA DE CARACTERIZACIÓN SOCIOLINGÜÍSTICA – 2026</h1>
+<nav><button data-tab="f" class="on">Encuesta</button><button data-tab="c">Consultar / Imprimir</button><button data-tab="a">Administrador</button></nav>
+<main>
+<section id="tf">
+<p class="note"><b>Propósito:</b> identificar las lenguas presentes en la comunidad, el manejo lingüístico declarado, los usos familiares y comunitarios, la transmisión entre generaciones y las expectativas sobre la educación intercultural bilingüe. Las respuestas describen percepciones; no evalúan el desempeño lingüístico. <b>Indicaciones:</b> marque una sola alternativa (a, b, c ó d) según su experiencia o conocimiento. El aplicador puede leer las preguntas en la lengua que comprenda el informante, sin sugerir respuestas.</p>
+<div class="card"><h2>DATOS GENERALES</h2>
+<div class="gr">
+<label class="f">UGEL<input type="text" id="ugel" readonly></label>
+<label class="f">Institución educativa<input type="text" id="ie" readonly></label>
+<label class="f">Código modular<input type="text" id="cm" readonly></label>
+<label class="f">Comunidad / Localidad<input type="text" id="loc" readonly></label>
+<label class="f">Distrito<input type="text" id="dis" readonly></label>
+<label class="f">Fecha<input type="text" id="fec" readonly></label>
+</div>
+<div class="f" style="margin-top:10px"><b style="font-size:13px">Condición del informante</b><div class="rg" id="g_cond"></div></div>
+<div class="gr">
+<label class="f">DNI del informante<input type="text" id="dni" inputmode="numeric" maxlength="8" autocomplete="off"></label>
+<label class="f">Nombres<input type="text" id="nom"></label>
+<label class="f">Apellido paterno<input type="text" id="apP"></label>
+<label class="f">Apellido materno<input type="text" id="apM"></label>
+</div>
+<p class="note" id="lkmsg"></p>
+<div class="gr"><div class="f"><b style="font-size:13px">Grupo de edad</b><div class="rg" id="g_edad"></div></div>
+<div class="f"><b style="font-size:13px">Sexo del informante</b><div class="rg" id="g_sexo"></div></div></div>
+</div>
+<div class="card"><h2>ESTUDIANTE(S) A CARGO</h2>
+<div id="est"></div><p class="note" id="estmsg"></p>
+<button class="btn s" type="button" id="tgl" hidden>+ Agregar otro estudiante</button>
+<div id="pick" class="gr">
+<label class="f">Grado<select id="sg"></select></label>
+<label class="f">Sección<select id="ss"></select></label>
+<label class="f" style="grid-column:1/-1">Estudiante<select id="sa"></select></label>
+<div><button class="btn" type="button" id="add">Agregar estudiante</button></div></div>
+</div>
+<div id="qs"></div>
+<button class="btn" id="save" type="button" style="font-size:16px;padding:12px 24px">Guardar encuesta</button>
+<div class="card" id="done" hidden style="margin-top:12px"><b>✔ Encuesta guardada.</b><br><button class="btn" id="dp" type="button">Imprimir</button><button class="btn s" id="dx" type="button">Descargar Excel</button><button class="btn s" id="dn" type="button">Nueva encuesta</button></div>
+<div class="card" style="margin-top:12px"><h2>CONFORMIDAD DEL REGISTRO</h2><p class="note">Firma o huella del informante y firma del aplicador/a: se completan en la hoja impresa.</p></div>
+</section>
+<section id="tc" hidden><div class="card"><h2>INFORMANTES REGISTRADOS</h2>
+<label class="f">Filtrar por DNI o nombre<input type="text" id="cd" autocomplete="off"></label>
+<p class="note" id="cn"></p><div style="overflow-x:auto"><table id="ct"></table></div></div></section>
+<section id="ta" hidden><div class="card"><h2>ADMINISTRADOR</h2>
+<p id="stats" class="note"></p>
+<label class="f">Cargar base de datos (Excel .xlsx)<input type="file" id="fi" accept=".xlsx"></label>
+<p class="note">Cargue el reporte «rptPadresFamiliaEstudiantes» (Excel del SIAGIE/I.E.) tal como lo descarga: se leen estudiante (grado, sección, DNI, nombres), y DNI y nombres de padre, madre y apoderado. Al cargar de nuevo, se actualizan los registros por DNI.</p>
+<button class="btn s" id="xa" type="button">Descargar todas las encuestas (Excel)</button>
+<button class="btn r" id="del" type="button">Borrar TODO</button></div></section>
+</main>
+<div id="pa"></div><div id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script type="module">
+/* ===== CONFIGURACIÓN ===== */
+const CFG={UGEL:"Huanta",IE:"José Santos Figueroa",COD:"0593293",LOC:"San José de Secce",DIS:"Santillana",PASS:"admin2026" /* ← contraseña de administrador (cámbiela) */};
+const FB={apiKey:"AIzaSyCsBsYAxHTWkeT_7z6HhozQLLh2m2hJE50",authDomain:"ficha-sociolinguistica.firebaseapp.com",projectId:"ficha-sociolinguistica",storageBucket:"ficha-sociolinguistica.firebasestorage.app",messagingSenderId:"926974028426",appId:"1:926974028426:web:bfda9401aa570cc056db73"};
+/* ===== UTIL ===== */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=s=>String(s??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
+const toast=m=>{const t=$("#toast");t.textContent=m;t.style.display="block";clearTimeout(toast.k);toast.k=setTimeout(()=>t.style.display="none",3500)};
+const today=()=>new Date().toLocaleDateString("en-CA"),fmt=d=>d.split("-").reverse().join("/");
+const val=n=>(document.querySelector(`input[name=${n}]:checked`)||{}).value||"";
+/* ===== DATOS DEL INSTRUMENTO ===== */
+const COND=["Padre","Madre","Abuelo/a","Apoderado/a","Autoridad comunal","Otro"],EDAD=["18 a 29 años","30 a 59 años","60 años o más"],SEXO=["Mujer","Hombre"];
+const SC=["Principalmente quechua","Principalmente castellano","Quechua y castellano con frecuencia similar"],u=(t,d)=>[t,[...SC,d]];
+const MAN=["No entiendo ni hablo","Entiendo, pero no hablo","Entiendo y hablo","Entiendo, hablo, leo y escribo"];
+const GEN=["Niñas, niños, jóvenes, adultos y adultos mayores","Principalmente adultos y adultos mayores","Principalmente niñas, niños y jóvenes","Se utiliza poco o nada en todas las generaciones"];
+const IMP=["Muy importante","Importante","Poco importante","Nada importante"],FRE=["Siempre","Frecuentemente","A veces","Nunca"];
+const SEC=[[0,"I. LENGUAS Y HABLANTES"],[6,"II. USO DE LAS LENGUAS Y TRANSMISIÓN"],[12,"III. VALORACIÓN Y DEMANDA EDUCATIVA"]];
+const Q=[
+["¿Cuál de estas situaciones describe mejor las lenguas que se hablan actualmente en su comunidad?",["Solo quechua","Solo castellano","Quechua y castellano","Se habla otra lengua, sola o junto con quechua y/o castellano"],"Si marcó d), especifique la otra lengua y, si corresponde, qué otras lenguas se hablan:"],
+["¿Qué lengua o lenguas aprendió primero durante su infancia?",["Quechua","Castellano","Quechua y castellano al mismo tiempo","Otra lengua o combinación de lenguas (especifique):"],"Especifique:"],
+["¿Cuál de estas opciones describe mejor su manejo del quechua?",MAN],
+["¿Cuál de estas opciones describe mejor su manejo del castellano?",MAN],
+["Según lo que observa, ¿en qué generaciones se utiliza habitualmente el quechua en su comunidad?",GEN],
+["Según lo que observa, ¿en qué generaciones se utiliza habitualmente el castellano en su comunidad?",GEN],
+u("En su hogar, ¿qué lengua se utiliza habitualmente para conversar?","Depende de la persona con quien se conversa"),
+u("¿Qué lengua se utiliza habitualmente en las reuniones o asambleas comunales?","Depende de los participantes"),
+u("¿Qué lengua se utiliza habitualmente en las faenas u otras actividades productivas de su comunidad?","Depende de las personas que participan"),
+u("En su familia, ¿qué lengua utilizan las personas adultas cuando conversan con las niñas y los niños?","Depende de la persona adulta"),
+u("En su familia, ¿qué lengua utilizan las niñas y los niños al responder a las personas adultas?","Depende de la persona con quien conversan"),
+u("¿Qué lengua utiliza habitualmente cuando realiza compras, visitas o trámites fuera de su comunidad?","Depende del lugar o de la persona con quien conversa"),
+["¿Qué importancia tiene para usted que las nuevas generaciones aprendan el quechua?",IMP],
+["¿Qué importancia tiene para usted que las nuevas generaciones aprendan el castellano?",IMP],
+["¿En qué lengua preferiría que se desarrolle la enseñanza de las y los estudiantes en la institución educativa?",["Principalmente en quechua","Principalmente en castellano","En quechua y castellano, de acuerdo con las necesidades de aprendizaje","No tengo preferencia por una lengua de enseñanza"]],
+["Según su percepción, ¿en qué medida la Educación Intercultural Bilingüe contribuye al aprendizaje de las y los estudiantes?",["Mucho","Bastante","Poco","Nada"]],
+["Según lo que conoce, ¿con qué frecuencia los docentes utilizan el quechua durante las clases?",FRE],
+["Según lo que conoce, ¿con qué frecuencia los docentes utilizan el castellano durante las clases?",FRE]];
+const rg=(n,o)=>o.map((t,i)=>`<label><input type="radio" name="${n}" value="${"abcdef"[i]}">${"abcdef"[i]}) ${t}</label>`).join("");
+/* ===== CAPA DE DATOS (Firestore o localStorage) ===== */
+let F=null,fdb=null,A=null,auth=null;
+const LS=c=>JSON.parse(localStorage.getItem("cs_"+c)||"{}");
+const store={
+ async get(c,id){if(F){const s=await F.getDoc(F.doc(fdb,c,id));return s.exists()?s.data():null}return LS(c)[id]||null},
+ async set(c,id,d){if(F)return F.setDoc(F.doc(fdb,c,id),d);const o=LS(c);o[id]=d;localStorage.setItem("cs_"+c,JSON.stringify(o))},
+ async all(c){return F?(await F.getDocs(F.collection(fdb,c))).docs.map(d=>d.data()):Object.values(LS(c))},
+ async many(c,it){if(F){for(let i=0;i<it.length;i+=450){const b=F.writeBatch(fdb);it.slice(i,i+450).forEach(([id,d])=>b.set(F.doc(fdb,c,id),d));await b.commit()}}else{const o=LS(c);it.forEach(([id,d])=>o[id]=d);localStorage.setItem("cs_"+c,JSON.stringify(o))}},
+ async clear(c){if(F){const ds=(await F.getDocs(F.collection(fdb,c))).docs;for(let i=0;i<ds.length;i+=450){const b=F.writeBatch(fdb);ds.slice(i,i+450).forEach(d=>b.delete(d.ref));await b.commit()}}else localStorage.removeItem("cs_"+c)}};
+async function initDB(){if(!FB.apiKey)return;const B="https://www.gstatic.com/firebasejs/10.12.2/",a=await import(B+"firebase-app.js");F=await import(B+"firebase-firestore.js");A=await import(B+"firebase-auth.js");const app=a.initializeApp(FB);fdb=F.getFirestore(app);auth=A.getAuth(app)}
+const signIn=()=>A.signInAnonymously(auth);
+/* ===== ESTADO ===== */
+let ALU=[],est=[],auto=false,last=null;
+const cv=v=>v==null?"":typeof v=="object"?(v.result??v.text??(v.richText?v.richText.map(t=>t.text).join(""):"")):v;
+const gOrd=g=>{const i=["PRIMERO","SEGUNDO","TERCERO","CUARTO","QUINTO","SEXTO"].indexOf(String(g).toUpperCase());return i>=0?i+1:parseInt(g)||99};
+async function loadALU(){ALU=await store.all("alumnos");const gs=[...new Set(ALU.map(a=>a.grado))].sort((a,b)=>gOrd(a)-gOrd(b)||String(a).localeCompare(String(b)));$("#sg").innerHTML='<option value="">— Grado —</option>'+gs.map(g=>`<option>${esc(g)}</option>`).join("");fillSec()}
+function fillSec(){const g=$("#sg").value,s=[...new Set(ALU.filter(a=>a.grado==g).map(a=>a.sec))].sort();$("#ss").innerHTML='<option value="">— Sección —</option>'+s.map(x=>`<option>${esc(x)}</option>`).join("");fillAl()}
+function fillAl(){const g=$("#sg").value,s=$("#ss").value,l=ALU.filter(a=>a.grado==g&&a.sec==s).sort((a,b)=>(a.apP+a.apM+a.nom).localeCompare(b.apP+b.apM+b.nom));$("#sa").innerHTML='<option value="">— Estudiante —</option>'+l.map(a=>`<option value="${esc(a.dni)}">${esc(a.apP)} ${esc(a.apM)}, ${esc(a.nom)} — ${esc(a.dni)}</option>`).join("")}
+const toE=a=>({dni:a.dni,nom:a.nom,apP:a.apP,apM:a.apM,grado:a.grado,sec:a.sec});
+function renderEst(){$("#est").innerHTML=est.map((e,i)=>`<div class="st"><span>${esc(e.apP)} ${esc(e.apM)}, ${esc(e.nom)} · DNI ${esc(e.dni)} · <b>${esc(e.grado)} “${esc(e.sec)}”</b></span><button type="button" data-rm="${i}" title="Quitar">×</button></div>`).join("");$("#pick").hidden=auto;$("#tgl").hidden=!auto;$("#estmsg").textContent=auto?"Estudiantes asociados al DNI del informante (tomados de la base de datos).":ALU.length?"Seleccione grado, sección y estudiante (uno por uno).":"La base de datos está vacía: el administrador debe cargarla."}
+function setNames(p){if(p||setNames.f)["nom","apP","apM"].forEach(k=>$("#"+k).value=p?p[k]:"");setNames.f=!!p;$("#lkmsg").textContent=p?"✔ Informante encontrado en la base de datos (puede corregir los nombres si hace falta).":/^\d{8}$/.test($("#dni").value)?"DNI no registrado: complete sus datos.":""}
+async function lookup(){const d=$("#dni").value.trim();if(!/^\d{8}$/.test(d)){setNames(null);return}
+ setNames(await store.get("personas",d));
+ if(["a","b","d"].includes(val("cond"))){const h=ALU.filter(a=>(a.apo||[]).includes(d));if(h.length){est=h.map(toE);auto=true;renderEst();return}}
+ if(auto){est=[];auto=false}renderEst()}
+/* ===== RENDER FORMULARIO ===== */
+const qhtml=()=>Q.map((q,i)=>(SEC.find(s=>s[0]==i)?`<div class="card" style="margin:14px 0 0;padding:6px 14px;background:var(--l)"><b>${SEC.find(s=>s[0]==i)[1]}</b></div>`:"")+`<div class="card q" style="border-radius:0;margin:0"><b>${i+1}. ${q[0]}</b><div class="rg">${rg("p"+(i+1),q[1])}</div>${q[2]?`<label class="f">${q[2]}<input type="text" id="x${i+1}"></label>`:""}</div>`).join("");
+function initForm(){$("#ugel").value=CFG.UGEL;$("#ie").value=CFG.IE;$("#cm").value=CFG.COD;$("#loc").value=CFG.LOC;$("#dis").value=CFG.DIS;$("#fec").value=fmt(today());
+ $("#g_cond").innerHTML=rg("cond",COND);$("#g_edad").innerHTML=rg("edad",EDAD);$("#g_sexo").innerHTML=rg("sexo",SEXO);$("#qs").innerHTML=qhtml()}
+function reset(){$("#done").hidden=true;$$("#tf input[type=radio]").forEach(r=>r.checked=false);["dni","nom","apP","apM","x1","x2"].forEach(k=>{$("#"+k).value="";$("#"+k).readOnly=false});est=[];auto=false;$("#fec").value=fmt(today());$("#lkmsg").textContent="";renderEst();scrollTo(0,0)}
+async function save(){const d=$("#dni").value.trim(),r={};
+ if(!val("cond"))return toast("Marque la condición del informante");
+ if(!/^\d{8}$/.test(d))return toast("DNI del informante: 8 dígitos");
+ if(!$("#nom").value.trim()||!$("#apP").value.trim())return toast("Complete nombres y apellido paterno del informante");
+ if(!val("edad")||!val("sexo"))return toast("Marque grupo de edad y sexo");
+ if(!est.length)return toast("Agregue al menos un estudiante");
+ for(let i=1;i<=18;i++){r[i]=val("p"+i);if(!r[i])return toast("Falta responder la pregunta "+i)}
+ if(await store.get("encuestas",d)&&!confirm("Ya existe una encuesta con este DNI. ¿Reemplazarla?"))return;
+ const f=today(),x={id:d,fecha:f,codigo:f.replaceAll("-","")+"-"+d,cond:val("cond"),dni:d,nom:$("#nom").value.trim(),apP:$("#apP").value.trim(),apM:$("#apM").value.trim(),edad:val("edad"),sexo:val("sexo"),est,r,x1:$("#x1").value,x2:$("#x2").value,ts:Date.now()};
+ try{await store.set("encuestas",d,x);if(!await store.get("personas",d))await store.set("personas",d,{dni:d,nom:x.nom,apP:x.apP,apM:x.apM})}catch(e){return toast("Error al guardar: "+e.message)}
+ last=x;$("#done").hidden=false;$("#done").scrollIntoView({behavior:"smooth"})}
+/* ===== EXCEL ===== */
+const HX=["codigo_modular","grado","seccion","condicion_informante","dni_informante","nombre_informante","ap_paterno_informante","ap_materno_informante","grupo_edad","sexo","dni_cod_estudiante","nombre_estudiante","ap_paterno_estudiante","ap_materno_estudiante",...Array.from({length:18},(_,i)=>"P"+(i+1))];
+function buildWb(recs){const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet("Hoja1",{views:[{state:"frozen",ySplit:4,topLeftCell:"A5"}]}),ar={name:"Arial",size:11},ce={horizontal:"center"};
+ ws.columns=[19,10.89,10.55,25.89,19.89,24,26.89,28.33,17,11.44,26.89,27.44,31.89,31.89,...Array(16).fill(5.66),5.89,5.89].map(width=>({width}));
+ ws.getRow(1).height=15;ws.getRow(2).height=24.6;ws.getRow(4).height=33;
+ ws.mergeCells("A2:N2");Object.assign(ws.getCell("A2"),{value:"2026 - ENCUESTA DE CARACTERIZACIÓN SOCIOLINGÜÍSTICA",font:{name:"Arial",size:20,bold:true,underline:true},alignment:ce});
+ const th={style:"thin"};HX.forEach((t,i)=>Object.assign(ws.getCell(4,i+1),{value:t,font:{name:"Arial",size:12,bold:true},fill:{type:"pattern",pattern:"solid",fgColor:{argb:"FFBFBFBF"}},border:{top:th,left:th,bottom:th,right:th},alignment:{horizontal:"center",vertical:"middle"}}));
+ let r=5;recs.forEach(x=>x.est.forEach(e=>{[CFG.COD,e.grado,e.sec,COND["abcdef".indexOf(x.cond)],x.dni,x.nom,x.apP,x.apM,EDAD["abc".indexOf(x.edad)],SEXO["ab".indexOf(x.sexo)],e.dni,e.nom,e.apP,e.apM,...Array.from({length:18},(_,i)=>x.r[i+1])].forEach((v,i)=>{const c=ws.getCell(r,i+1),k=i+1;c.value=v;c.font=ar;if((k>=2&&k<=9)||k==13||k==14||(k>=15&&k<=30))c.alignment=ce});r++}));return wb}
+async function xlsx(recs,name){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([await buildWb(recs).xlsx.writeBuffer()],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));a.download=name+".xlsx";document.body.appendChild(a);a.click();a.remove()}
+const ORD=["PRIMERO","SEGUNDO","TERCERO","CUARTO","QUINTO","SEXTO"],PART=new Set(["DE","DEL","LA","LAS","LOS","SAN","SANTA","Y","DA","DI"]);
+function splitName(s){const t=s.trim().split(/\s+/).filter(Boolean),take=()=>{const w=[];while(t.length>1){const x=t.shift();w.push(x);if(!PART.has(x.toUpperCase()))break}return w.join(" ")},apP=take(),apM=take();return{apP,apM,nom:t.join(" ")}}
+function parseBase(wb){const al=new Map(),pe=new Map(),ws=wb.worksheets[0],s=x=>String(cv(x)??"").trim();let h=0;
+ for(let r=1;r<=40&&!h;r++)if(s(ws.getCell(r,3).value).toUpperCase()=="GRADO")h=r;
+ if(!h)throw new Error("No se encontró la fila de encabezados (GRADO)");
+ for(let r=h+1;r<=ws.rowCount;r++){const c=n=>s(ws.getCell(r,n).value),dni=c(6);if(!dni)continue;const apo=[];
+  [[23,10],[28,24],[33,29]].forEach(([d,n])=>{const x=c(d);if(x){if(!apo.includes(x))apo.push(x);if(c(n))pe.set(x,{dni:x,...splitName(c(n))})}});
+  al.set(dni,{dni,apP:c(7),apM:c(8),nom:c(9),grado:c(3).toUpperCase(),sec:c(4).split(/\s+/).pop().toUpperCase(),apo})}
+ return{al,pe}}
+async function importDB(file){const wb=new ExcelJS.Workbook();await wb.xlsx.load(await file.arrayBuffer());const{al,pe}=parseBase(wb);
+ await store.many("alumnos",[...al]);await store.many("personas",[...pe]);await loadALU();stats();toast(`Cargados ${al.size} estudiantes y ${pe.size} informantes`)}
+async function stats(){const[e]=await Promise.all([store.all("encuestas")]);$("#stats").textContent=`Modo: ${F?"Firebase":"local (sin Firebase configurado)"} · Estudiantes en base: ${ALU.length} · Encuestas guardadas: ${e.length}`}
+/* ===== IMPRESIÓN ===== */
+function pform(x){const lt=i=>"abcdef"[i];
+ return `<div style="text-align:center">GOBIERNO REGIONAL DE AYACUCHO<br><b>DIRECCIÓN REGIONAL DE EDUCACIÓN DE AYACUCHO</b><br>DIRECCIÓN DE GESTIÓN PEDAGÓGICA<br><b>“Año de la esperanza y fortalecimiento de la democracia”</b><h3>ENCUESTA DE CARACTERIZACIÓN SOCIOLINGÜÍSTICA – 2026</h3></div>
+<table><tr><th width="28%">UGEL / institución educativa</th><td>${CFG.UGEL} – “${CFG.IE}” (${CFG.COD})</td></tr><tr><th>Comunidad, localidad, distrito</th><td>${CFG.LOC} - ${CFG.DIS}</td></tr><tr><th>Código de encuesta / fecha</th><td>${x.codigo} / ${fmt(x.fecha)}</td></tr>
+<tr><th>Condición del informante</th><td>${COND.map((c,i)=>`${x.cond==lt(i)?"☒":"☐"} ${lt(i)}) ${c}`).join(" &nbsp; ")}</td></tr><tr><th>DNI del informante</th><td>${x.dni}</td></tr><tr><th>Apellidos y nombres</th><td>${esc(x.apP)} ${esc(x.apM)}, ${esc(x.nom)}</td></tr>
+<tr><th>Grupo de edad</th><td>${EDAD.map((c,i)=>`${x.edad==lt(i)?"☒":"☐"} ${lt(i)}) ${c}`).join(" &nbsp; ")}</td></tr><tr><th>Sexo</th><td>${SEXO.map((c,i)=>`${x.sexo==lt(i)?"☒":"☐"} ${lt(i)}) ${c}`).join(" &nbsp; ")}</td></tr></table>
+<table><tr><th>APELLIDOS Y NOMBRES DEL ESTUDIANTE</th><th>DNI</th><th>GRADO Y SECCIÓN</th></tr>${x.est.map(e=>`<tr><td>${esc(e.apP)} ${esc(e.apM)}, ${esc(e.nom)}</td><td>${esc(e.dni)}</td><td>${esc(e.grado)} “${esc(e.sec)}”</td></tr>`).join("")}</table>`+
+ Q.map((q,i)=>(SEC.find(s=>s[0]==i)?`<div class="sec">${SEC.find(s=>s[0]==i)[1]}</div>`:"")+`<div class="pq"><b>${i+1}. ${q[0]}</b><br>${q[1].map((o,j)=>`${x.r[i+1]==lt(j)?"☒":"☐"} ${lt(j)}) ${o}`).join(" &nbsp; ")}${q[2]&&x["x"+(i+1)]?`<br><i>Especifica: ${esc(x["x"+(i+1)])}</i>`:""}</div>`).join("")+
+ `<table style="border:0;margin-top:40px"><tr><td style="border:0;text-align:center">........................................<br>Firma o huella del informante</td><td style="border:0;text-align:center">........................................<br>Firma del aplicador/a</td></tr></table>`}
+const prn=x=>{$("#pa").innerHTML=pform(x);setTimeout(()=>print(),100)};
+/* ===== LISTA DE INFORMANTES ===== */
+let LST=[];
+async function renderList(){LST=(await store.all("encuestas")).sort((a,b)=>b.ts-a.ts);drawList()}
+function drawList(){const q=norm($("#cd").value),l=LST.filter(x=>!q||norm(x.dni+" "+x.apP+" "+x.apM+" "+x.nom).includes(q));
+ $("#cn").textContent=`${l.length} de ${LST.length} informante(s)`;
+ $("#ct").innerHTML=`<tr><th>#</th><th>Fecha</th><th>DNI</th><th>Informante</th><th>Estudiante(s)</th><th></th></tr>`+l.map((x,i)=>`<tr><td>${l.length-i}</td><td>${fmt(x.fecha)}</td><td>${x.dni}</td><td>${esc(x.apP)} ${esc(x.apM)}, ${esc(x.nom)}<br><small>${COND[("abcdef").indexOf(x.cond)]}</small></td><td>${x.est.map(e=>`${esc(e.apP)} ${esc(e.nom)} (${esc(e.grado)} ${esc(e.sec)})`).join("<br>")}</td><td style="white-space:nowrap"><button class="btn" data-pr="${x.dni}">Imprimir</button><button class="btn s" data-xl="${x.dni}">Excel</button></td></tr>`).join("")}
+/* ===== EVENTOS ===== */
+let admin=false;
+document.addEventListener("click",async e=>{const t=e.target;
+ if(t.dataset.tab){const k=t.dataset.tab;if(k=="a"&&!admin){if(prompt("Contraseña de administrador:")!==CFG.PASS)return toast("Contraseña incorrecta");admin=true}
+  $$("nav button").forEach(b=>b.classList.toggle("on",b==t));["f","c","a"].forEach(s=>$("#t"+s).hidden=s!=k);if(k=="a")stats();if(k=="c")renderList()}
+ if(t.dataset.rm!=null){est.splice(+t.dataset.rm,1);renderEst()}
+ if(t.id=="tgl"){$("#pick").hidden=false}
+ if(t.id=="add"){const a=ALU.find(x=>x.dni==$("#sa").value);if(!a)return toast("Seleccione un estudiante");if(est.some(x=>x.dni==a.dni))return toast("Ya está en la lista");est.push(toE(a));renderEst();$("#pick").hidden=auto?false:false}
+ if(t.id=="save")save();if(t.id=="dp")prn(last);if(t.id=="dx")xlsx([last],"ficha_"+last.dni);if(t.id=="dn")reset();
+ if(t.dataset.pr){const x=LST.find(y=>y.dni==t.dataset.pr);if(x)prn(x)}
+ if(t.dataset.xl){const x=LST.find(y=>y.dni==t.dataset.xl);if(x)xlsx([x],"ficha_"+x.dni)}
+ if(t.id=="xa"){const l=await store.all("encuestas");l.length?xlsx(l.sort((a,b)=>a.ts-b.ts),"FICHA_DE_CARACTERIZACION_SOCIOLINGUISTICA"):toast("No hay encuestas")}
+ if(t.id=="del"){if(prompt("Contraseña de administrador:")!==CFG.PASS)return toast("Contraseña incorrecta");if(!confirm("Se borrará TODA la base de datos y TODAS las encuestas. ¿Continuar?"))return;for(const c of["alumnos","personas","encuestas"])await store.clear(c);await loadALU();reset();stats();toast("Todo fue borrado")}});
+$("#dni").addEventListener("input",lookup);$("#g_cond").addEventListener("change",lookup);
+$("#cd").addEventListener("input",drawList);$("#sg").onchange=fillSec;$("#ss").onchange=fillAl;
+$("#fi").onchange=async e=>{if(e.target.files[0]){try{await importDB(e.target.files[0])}catch(x){toast("Error: "+x.message)}e.target.value=""}};
+/* ===== INICIO ===== */
+initForm();await initDB();if(F)await signIn();await loadALU();renderEst();
+</script></body></html>
