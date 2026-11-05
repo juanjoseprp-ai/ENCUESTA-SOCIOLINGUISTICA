@@ -45,6 +45,7 @@ input[readonly]{background:var(--g)}
 <nav><button data-tab="f" class="on">Encuesta</button><button data-tab="c">Consultar / Imprimir</button><button data-tab="a">Administrador</button></nav>
 <main>
 <section id="tf">
+<div id="eb" class="card" hidden style="background:#fff3cd;border-color:#e0b800">✏ Editando la encuesta de <b id="en"></b>. Puede corregir datos, respuestas y agregar o quitar estudiantes; luego pulse «Guardar encuesta». <button class="btn s" id="ec" type="button">Cancelar edición</button></div>
 <p class="note"><b>Propósito:</b> identificar las lenguas presentes en la comunidad, el manejo lingüístico declarado, los usos familiares y comunitarios, la transmisión entre generaciones y las expectativas sobre la educación intercultural bilingüe. Las respuestas describen percepciones; no evalúan el desempeño lingüístico. <b>Indicaciones:</b> marque una sola alternativa (a, b, c ó d) según su experiencia o conocimiento. El aplicador puede leer las preguntas en la lengua que comprenda el informante, sin sugerir respuestas.</p>
 <div class="card"><h2>DATOS GENERALES</h2>
 <div class="gr">
@@ -79,7 +80,7 @@ input[readonly]{background:var(--g)}
 </div>
 <div id="qs"></div>
 <button class="btn" id="save" type="button" style="font-size:16px;padding:12px 24px">Guardar encuesta</button>
-<div class="card" id="done" hidden style="margin-top:12px"><b>✔ Encuesta guardada.</b><br><button class="btn" id="dp" type="button">Imprimir</button><button class="btn s" id="dx" type="button">Descargar Excel</button><button class="btn s" id="dn" type="button">Nueva encuesta</button></div>
+<div class="card" id="done" hidden style="margin-top:12px"><b>✔ Encuesta guardada.</b><br><button class="btn" id="dp" type="button">Imprimir</button><button class="btn s" id="dx" type="button">Descargar Excel</button><button class="btn s" id="dn" type="button">Nueva encuesta</button><button class="btn s" id="db" type="button" hidden>Volver a Administrador</button></div>
 <div class="card" style="margin-top:12px"><h2>CONFORMIDAD DEL REGISTRO</h2><p class="note">Firma o huella del informante y firma del aplicador/a: se completan en la hoja impresa.</p></div>
 </section>
 <section id="tc" hidden><div class="card"><h2>INFORMANTES REGISTRADOS</h2>
@@ -150,7 +151,7 @@ const store={
 async function initDB(){if(!FB.apiKey)return;const B="https://www.gstatic.com/firebasejs/10.12.2/",a=await import(B+"firebase-app.js"),f=await import(B+"firebase-firestore.js"),u=await import(B+"firebase-auth.js"),app=a.initializeApp(FB);F=f;A=u;fdb=F.getFirestore(app);auth=A.getAuth(app)}
 const signIn=()=>A.signInAnonymously(auth);
 /* ===== ESTADO ===== */
-let PER=[],ALU=[],est=[],auto=false,last=null;
+let PER=[],ALU=[],editing=null,est=[],auto=false,last=null;
 const cv=v=>v==null?"":typeof v=="object"?(v.result??v.text??(v.richText?v.richText.map(t=>t.text).join(""):"")):v;
 const gOrd=g=>{const i=["PRIMERO","SEGUNDO","TERCERO","CUARTO","QUINTO","SEXTO"].indexOf(String(g).toUpperCase());return i>=0?i+1:parseInt(g)||99};
 const cmpE=(a,b)=>gOrd(a.grado)-gOrd(b.grado)||String(a.sec).localeCompare(String(b.sec));
@@ -162,7 +163,7 @@ function fillAl(){const g=$("#sg").value,s=$("#ss").value,l=ALU.filter(a=>a.grad
 const toE=a=>({dni:a.dni,nom:a.nom,apP:a.apP,apM:a.apM,grado:a.grado,sec:a.sec});
 function renderEst(){$("#est").innerHTML=est.map((e,i)=>`<div class="st"><span>${esc(e.apP)} ${esc(e.apM)}, ${esc(e.nom)} · DNI ${esc(e.dni)} · <b>${esc(e.grado)} “${esc(e.sec)}”</b></span><button type="button" data-rm="${i}" title="Quitar">×</button></div>`).join("");$("#pick").hidden=auto;$("#tgl").hidden=!auto;$("#estmsg").textContent=auto?"Estudiantes asociados al DNI del informante (tomados de la base de datos).":ALU.length?"Seleccione grado, sección y estudiante (uno por uno).":"La base de datos está vacía: el administrador debe cargarla."}
 function setNames(p){if(p||setNames.f)["nom","apP","apM"].forEach(k=>$("#"+k).value=p?p[k]:"");setNames.f=!!p;$("#lkmsg").textContent=p?"✔ Informante encontrado en la base de datos (puede corregir los nombres si hace falta).":/^\d{8}$/.test($("#dni").value)?"DNI no registrado: complete sus datos.":""}
-async function lookup(){const d=$("#dni").value.trim();if(!/^\d{8}$/.test(d)){setNames(null);return}
+async function lookup(){if(editing)return;const d=$("#dni").value.trim();if(!/^\d{8}$/.test(d)){setNames(null);return}
  setNames(await store.get("personas",d));
  if(["a","b","d"].includes(val("cond"))){const h=ALU.filter(a=>(a.apo||[]).includes(d));if(h.length){est=h.map(toE);auto=true;renderEst();return}}
  if(auto){est=[];auto=false}renderEst()}
@@ -170,7 +171,10 @@ async function lookup(){const d=$("#dni").value.trim();if(!/^\d{8}$/.test(d)){se
 const qhtml=()=>Q.map((q,i)=>(SEC.find(s=>s[0]==i)?`<div class="card" style="margin:14px 0 0;padding:6px 14px;background:var(--l)"><b>${SEC.find(s=>s[0]==i)[1]}</b></div>`:"")+`<div class="card q" style="border-radius:0;margin:0"><b>${i+1}. ${q[0]}</b><div class="rg">${rg("p"+(i+1),q[1])}</div>${q[2]?`<label class="f">${q[2]}<input type="text" id="x${i+1}"></label>`:""}</div>`).join("");
 function initForm(){$("#logo").src=LOGO;$("#ugel").value=CFG.UGEL;$("#ie").value=CFG.IE;$("#cm").value=CFG.COD;$("#loc").value=CFG.LOC;$("#dis").value=CFG.DIS;$("#fec").value=fmt(today());
  $("#g_cond").innerHTML=rg("cond",COND);$("#g_edad").innerHTML=rg("edad",EDAD);$("#g_sexo").innerHTML=rg("sexo",SEXO);$("#qs").innerHTML=qhtml()}
-function reset(){$("#done").hidden=true;$$("#tf input[type=radio]").forEach(r=>r.checked=false);["bn","dni","nom","apP","apM","x1","x2"].forEach(k=>{$("#"+k).value="";$("#"+k).readOnly=false});est=[];auto=false;$("#fec").value=fmt(today());$("#lkmsg").textContent="";$("#bl").innerHTML="";renderEst();scrollTo(0,0)}
+function reset(){editing=null;$("#eb").hidden=true;$("#db").hidden=true;$("#done").hidden=true;$$("#tf input[type=radio]").forEach(r=>r.checked=false);["bn","dni","nom","apP","apM","x1","x2"].forEach(k=>{$("#"+k).value="";$("#"+k).readOnly=false});est=[];auto=false;$("#fec").value=fmt(today());$("#lkmsg").textContent="";$("#bl").innerHTML="";renderEst();scrollTo(0,0)}
+function goTab(k){$$("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab==k));["f","c","a"].forEach(s=>$("#t"+s).hidden=s!=k);if(k=="a")stats();if(k=="a"||k=="c")renderList()}
+const setR=(n,v)=>{const r=document.querySelector(`input[name=${n}][value=${v}]`);if(r)r.checked=true};
+function startEdit(x){reset();editing=x;setR("cond",x.cond);$("#dni").value=x.dni;$("#dni").readOnly=true;$("#nom").value=x.nom;$("#apP").value=x.apP;$("#apM").value=x.apM;setR("edad",x.edad);setR("sexo",x.sexo);est=x.est.map(e=>({...e}));auto=false;renderEst();for(let i=1;i<=18;i++)setR("p"+i,x.r[i]);$("#x1").value=x.x1||"";$("#x2").value=x.x2||"";$("#fec").value=fmt(x.fecha);$("#en").textContent=`${x.apP} ${x.apM}, ${x.nom} (DNI ${x.dni})`;$("#eb").hidden=false;$("#lkmsg").textContent="";goTab("f");scrollTo(0,0)}
 async function save(){const d=$("#dni").value.trim(),r={};
  if(!val("cond"))return toast("Marque la condición del informante");
  if(!/^\d{8}$/.test(d))return toast("DNI del informante: 8 dígitos");
@@ -178,10 +182,10 @@ async function save(){const d=$("#dni").value.trim(),r={};
  if(!val("edad")||!val("sexo"))return toast("Marque grupo de edad y sexo");
  if(!est.length)return toast("Agregue al menos un estudiante");
  for(let i=1;i<=18;i++){r[i]=val("p"+i);if(!r[i])return toast("Falta responder la pregunta "+i)}
- if(await store.get("encuestas",d)&&!confirm("Ya existe una encuesta con este DNI. ¿Reemplazarla?"))return;
- const f=today(),x={id:d,fecha:f,codigo:f.replaceAll("-","")+"-"+d,cond:val("cond"),dni:d,nom:$("#nom").value.trim(),apP:$("#apP").value.trim(),apM:$("#apM").value.trim(),edad:val("edad"),sexo:val("sexo"),est,r,x1:$("#x1").value,x2:$("#x2").value,ts:Date.now()};
+ if(!editing&&await store.get("encuestas",d)&&!confirm("Ya existe una encuesta con este DNI. ¿Reemplazarla?"))return;
+ const ed=editing,f=ed?ed.fecha:today(),x={id:d,fecha:f,codigo:ed?ed.codigo:f.replaceAll("-","")+"-"+d,cond:val("cond"),dni:d,nom:$("#nom").value.trim(),apP:$("#apP").value.trim(),apM:$("#apM").value.trim(),edad:val("edad"),sexo:val("sexo"),est,r,x1:$("#x1").value,x2:$("#x2").value,ts:ed?ed.ts:Date.now(),...(ed?{mod:Date.now()}:{})};
  try{await store.set("encuestas",d,x);if(!await store.get("personas",d))await store.set("personas",d,{dni:d,nom:x.nom,apP:x.apP,apM:x.apM})}catch(e){return toast("Error al guardar: "+e.message)}
- last=x;$("#done").hidden=false;$("#done").scrollIntoView({behavior:"smooth"})}
+ last=x;if(editing){editing=null;$("#dni").readOnly=false;$("#eb").hidden=true;$("#db").hidden=false}$("#done").hidden=false;$("#done").scrollIntoView({behavior:"smooth"})}
 /* ===== EXCEL ===== */
 const HX=["codigo_modular","grado","seccion","condicion_informante","dni_informante","nombre_informante","ap_paterno_informante","ap_materno_informante","grupo_edad","sexo","dni_cod_estudiante","nombre_estudiante","ap_paterno_estudiante","ap_materno_estudiante",...Array.from({length:18},(_,i)=>"P"+(i+1))];
 function buildWb(recs){const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet("Hoja1",{views:[{state:"frozen",ySplit:4,topLeftCell:"A5"}]}),ar={name:"Arial",size:11},ce={horizontal:"center"};
@@ -230,7 +234,7 @@ function drawAdm(){const q=norm($("#ad").value).split("_").filter(Boolean),f=LST
  $("#an").textContent=LST.length?`${f.length} de ${LST.length} informante(s) · ${l.length} fila(s), ordenadas por grado y sección`:"No hay registros guardados.";
  let g="",n=0,s=0;
  $("#at").innerHTML=`<tr><th>#</th><th>N.º sec.</th><th>Fecha</th><th>DNI informante</th><th>Informante</th><th>Estudiante</th><th></th></tr>`+l.map(({x,e})=>{const gk=`${e.grado} “${e.sec}”`,hd=gk!=g?(g=gk,s=0,`<tr><td colspan="7" style="background:var(--l);font-weight:700">${esc(gk)}</td></tr>`):"";
- return hd+`<tr><td>${++n}</td><td>${++s}</td><td>${fmt(x.fecha)}</td><td>${x.dni}</td><td>${esc(x.apP)} ${esc(x.apM)}, ${esc(x.nom)}<br><small>${COND[("abcdef").indexOf(x.cond)]}</small></td><td>${esc(e.apP)} ${esc(e.apM)}, ${esc(e.nom)}<br><small>DNI ${esc(e.dni)}</small></td><td><button class="btn r" data-del="${x.dni}" data-de="${esc(e.dni)}">Eliminar</button></td></tr>`}).join("")}
+ return hd+`<tr><td>${++n}</td><td>${++s}</td><td>${fmt(x.fecha)}</td><td>${x.dni}</td><td>${esc(x.apP)} ${esc(x.apM)}, ${esc(x.nom)}<br><small>${COND[("abcdef").indexOf(x.cond)]}</small></td><td>${esc(e.apP)} ${esc(e.apM)}, ${esc(e.nom)}<br><small>DNI ${esc(e.dni)}</small></td><td style="white-space:nowrap"><button class="btn" data-ed="${x.dni}">Editar</button><button class="btn r" data-del="${x.dni}" data-de="${esc(e.dni)}">Eliminar</button></td></tr>`}).join("")}
 const drawList=()=>{drawLst();drawAdm()};
 /* ===== EVENTOS ===== */
 let admin=false;
@@ -243,6 +247,8 @@ document.addEventListener("click",async e=>{const t=e.target;
  if(t.id=="save")save();if(t.id=="dp")prn(last);if(t.id=="dx")xlsx([last],"ficha_"+last.dni);if(t.id=="dn")reset();
  if(t.dataset.pick){$("#dni").value=t.dataset.pick;$("#bn").value="";$("#bl").innerHTML="";lookup()}
  if(t.dataset.del){const x=LST.find(y=>y.dni==t.dataset.del),e=x&&x.est.find(s=>s.dni==t.dataset.de);if(e&&confirm(`¿Eliminar a ${e.apP} ${e.apM}, ${e.nom} (${e.grado} ${e.sec}) junto con su informante ${x.apP} ${x.apM}, ${x.nom} de esta fila?\n\nLos demás hijos de este informante NO se eliminan. No se puede deshacer.`)){try{const rest=x.est.filter(s=>s.dni!=e.dni);if(rest.length)await store.set("encuestas",x.dni,{...x,est:rest});else await store.del("encuestas",x.dni);if(!F)await renderList();toast("Fila eliminada")}catch(er){toast("Error: "+er.message)}}}
+ if(t.dataset.ed){const x=LST.find(y=>y.dni==t.dataset.ed);if(x)startEdit(x)}
+ if(t.id=="ec"||t.id=="db"){reset();goTab("a")}
  if(t.dataset.pr){const x=LST.find(y=>y.dni==t.dataset.pr);if(x)prn(x)}
  if(t.dataset.xl){const x=LST.find(y=>y.dni==t.dataset.xl);if(x)xlsx([x],"ficha_"+x.dni)}
  if(t.id=="xa"){const l=await store.all("encuestas");l.length?xlsx(l.sort((a,b)=>a.ts-b.ts),"FICHA_DE_CARACTERIZACION_SOCIOLINGUISTICA"):toast("No hay encuestas")}
