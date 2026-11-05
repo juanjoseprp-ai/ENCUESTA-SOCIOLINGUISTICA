@@ -29,7 +29,7 @@ input[readonly]{background:var(--g)}
 .st button{border:0;background:none;color:#b3261e;font-size:18px;cursor:pointer}
 .note{font-size:12px;color:#5b6b75}
 #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1c2a33;color:#fff;padding:10px 18px;border-radius:8px;z-index:9;display:none;max-width:90%}
-#ct{width:100%;border-collapse:collapse;font-size:13px}#ct td,#ct th{border-bottom:1px solid #d5dde2;padding:6px;text-align:left}#ct th{background:var(--g)}
+#ct,#at{width:100%;border-collapse:collapse;font-size:13px}#ct td,#ct th,#at td,#at th{border-bottom:1px solid #d5dde2;padding:6px;text-align:left}#ct th,#at th{background:var(--g)}
 #pa{display:none}
 #pa{font:11px/1.35 Arial,sans-serif;color:#000}
 #pa table{width:100%;border-collapse:collapse;margin:6px 0}
@@ -90,7 +90,10 @@ input[readonly]{background:var(--g)}
 <label class="f">Cargar base de datos (Excel .xlsx)<input type="file" id="fi" accept=".xlsx"></label>
 <p class="note">Cargue el reporte «rptPadresFamiliaEstudiantes» (Excel del SIAGIE/I.E.) tal como lo descarga: se leen estudiante (grado, sección, DNI, nombres), y DNI y nombres de padre, madre y apoderado. Al cargar de nuevo, se actualizan los registros por DNI.</p>
 <button class="btn s" id="xa" type="button">Descargar todas las encuestas (Excel)</button>
-<button class="btn r" id="del" type="button">Borrar TODO</button></div></section>
+<button class="btn r" id="del" type="button">Borrar TODO</button></div>
+<div class="card"><h2>REGISTROS GUARDADOS (ELIMINAR FILA POR FILA)</h2>
+<label class="f">Buscar informante por DNI, nombres o apellidos<input type="text" id="ad" autocomplete="off"></label>
+<p class="note" id="an"></p><div style="overflow-x:auto"><table id="at"></table></div></div></section>
 </main>
 <footer>PIP Juan Josep Ramos Pozo</footer>
 <div id="pa"></div><div id="toast"></div>
@@ -142,6 +145,7 @@ const store={
  async set(c,id,d){if(F)return F.setDoc(F.doc(fdb,c,id),d);const o=LS(c);o[id]=d;localStorage.setItem("cs_"+c,JSON.stringify(o))},
  async all(c){return F?(await F.getDocs(F.collection(fdb,c))).docs.map(d=>d.data()):Object.values(LS(c))},
  async many(c,it){if(F){for(let i=0;i<it.length;i+=450){const b=F.writeBatch(fdb);it.slice(i,i+450).forEach(([id,d])=>b.set(F.doc(fdb,c,id),d));await b.commit()}}else{const o=LS(c);it.forEach(([id,d])=>o[id]=d);localStorage.setItem("cs_"+c,JSON.stringify(o))}},
+ async del(c,id){if(F)return F.deleteDoc(F.doc(fdb,c,id));const o=LS(c);delete o[id];localStorage.setItem("cs_"+c,JSON.stringify(o))},
  async clear(c){if(F){const ds=(await F.getDocs(F.collection(fdb,c))).docs;for(let i=0;i<ds.length;i+=450){const b=F.writeBatch(fdb);ds.slice(i,i+450).forEach(d=>b.delete(d.ref));await b.commit()}}else localStorage.removeItem("cs_"+c)}};
 async function initDB(){if(!FB.apiKey)return;const B="https://www.gstatic.com/firebasejs/10.12.2/",a=await import(B+"firebase-app.js"),f=await import(B+"firebase-firestore.js"),u=await import(B+"firebase-auth.js"),app=a.initializeApp(FB);F=f;A=u;fdb=F.getFirestore(app);auth=A.getAuth(app)}
 const signIn=()=>A.signInAnonymously(auth);
@@ -216,28 +220,35 @@ function buscarNom(){const q=norm($("#bn").value).split("_").filter(Boolean),b=$
 /* ===== LISTA DE INFORMANTES ===== */
 let LST=[];
 async function renderList(){if(F){if(!renderList.u)renderList.u=F.onSnapshot(F.collection(fdb,"encuestas"),s=>{LST=s.docs.map(d=>d.data()).sort((a,b)=>b.ts-a.ts);drawList()},e=>bar("Error al leer encuestas: "+e.message,1))}else{LST=(await store.all("encuestas")).sort((a,b)=>b.ts-a.ts);drawList()}}
-function drawList(){const q=norm($("#cd").value).split("_").filter(Boolean),f=LST.filter(x=>{const t=norm(x.dni+" "+x.apP+" "+x.apM+" "+x.nom);return q.every(w=>t.includes(w))}),
+function drawLst(){const q=norm($("#cd").value).split("_").filter(Boolean),f=LST.filter(x=>{const t=norm(x.dni+" "+x.apP+" "+x.apM+" "+x.nom);return q.every(w=>t.includes(w))}),
  l=f.flatMap(x=>x.est.map(e=>({x,e}))).sort((a,b)=>cmpE(a.e,b.e)||a.x.ts-b.x.ts);
  $("#cn").textContent=LST.length?`${f.length} de ${LST.length} informante(s) · ${l.length} estudiante(s), ordenados por grado y sección`:"Aún no hay encuestas registradas. Aquí aparecerán a medida que se guarden.";
- let g="",n=0;
- $("#ct").innerHTML=`<tr><th>#</th><th>Fecha</th><th>DNI informante</th><th>Informante</th><th>Estudiante</th><th></th></tr>`+l.map(({x,e})=>{const gk=`${e.grado} “${e.sec}”`,hd=gk!=g?(g=gk,`<tr><td colspan="6" style="background:var(--l);font-weight:700">${esc(gk)}</td></tr>`):"";
- return hd+`<tr><td>${++n}</td><td>${fmt(x.fecha)}</td><td>${x.dni}</td><td>${esc(x.apP)} ${esc(x.apM)}, ${esc(x.nom)}<br><small>${COND[("abcdef").indexOf(x.cond)]}</small></td><td>${esc(e.apP)} ${esc(e.apM)}, ${esc(e.nom)}<br><small>DNI ${esc(e.dni)}</small></td><td style="white-space:nowrap"><button class="btn" data-pr="${x.dni}">Imprimir</button><button class="btn s" data-xl="${x.dni}">Excel</button></td></tr>`}).join("")}
+ let g="",n=0,s=0;
+ $("#ct").innerHTML=`<tr><th>#</th><th>N.º sec.</th><th>Fecha</th><th>DNI informante</th><th>Informante</th><th>Estudiante</th><th></th></tr>`+l.map(({x,e})=>{const gk=`${e.grado} “${e.sec}”`,hd=gk!=g?(g=gk,s=0,`<tr><td colspan="7" style="background:var(--l);font-weight:700">${esc(gk)}</td></tr>`):"";
+ return hd+`<tr><td>${++n}</td><td>${++s}</td><td>${fmt(x.fecha)}</td><td>${x.dni}</td><td>${esc(x.apP)} ${esc(x.apM)}, ${esc(x.nom)}<br><small>${COND[("abcdef").indexOf(x.cond)]}</small></td><td>${esc(e.apP)} ${esc(e.apM)}, ${esc(e.nom)}<br><small>DNI ${esc(e.dni)}</small></td><td style="white-space:nowrap"><button class="btn" data-pr="${x.dni}">Imprimir</button><button class="btn s" data-xl="${x.dni}">Excel</button></td></tr>`}).join("")}
+function drawAdm(){const q=norm($("#ad").value).split("_").filter(Boolean),f=LST.filter(x=>{const t=norm(x.dni+" "+x.apP+" "+x.apM+" "+x.nom);return q.every(w=>t.includes(w))}),l=f.flatMap(x=>x.est.map(e=>({x,e}))).sort((a,b)=>cmpE(a.e,b.e)||a.x.ts-b.x.ts);
+ $("#an").textContent=LST.length?`${f.length} de ${LST.length} informante(s) · ${l.length} fila(s), ordenadas por grado y sección`:"No hay registros guardados.";
+ let g="",n=0,s=0;
+ $("#at").innerHTML=`<tr><th>#</th><th>N.º sec.</th><th>Fecha</th><th>DNI informante</th><th>Informante</th><th>Estudiante</th><th></th></tr>`+l.map(({x,e})=>{const gk=`${e.grado} “${e.sec}”`,hd=gk!=g?(g=gk,s=0,`<tr><td colspan="7" style="background:var(--l);font-weight:700">${esc(gk)}</td></tr>`):"";
+ return hd+`<tr><td>${++n}</td><td>${++s}</td><td>${fmt(x.fecha)}</td><td>${x.dni}</td><td>${esc(x.apP)} ${esc(x.apM)}, ${esc(x.nom)}<br><small>${COND[("abcdef").indexOf(x.cond)]}</small></td><td>${esc(e.apP)} ${esc(e.apM)}, ${esc(e.nom)}<br><small>DNI ${esc(e.dni)}</small></td><td><button class="btn r" data-del="${x.dni}" data-de="${esc(e.dni)}">Eliminar</button></td></tr>`}).join("")}
+const drawList=()=>{drawLst();drawAdm()};
 /* ===== EVENTOS ===== */
 let admin=false;
 document.addEventListener("click",async e=>{const t=e.target;
  if(t.dataset.tab){const k=t.dataset.tab;if(k=="a"&&!admin){if(prompt("Contraseña de administrador:")!==CFG.PASS)return toast("Contraseña incorrecta");admin=true}
-  $$("nav button").forEach(b=>b.classList.toggle("on",b==t));["f","c","a"].forEach(s=>$("#t"+s).hidden=s!=k);if(k=="a")stats();if(k=="c")renderList()}
+  $$("nav button").forEach(b=>b.classList.toggle("on",b==t));["f","c","a"].forEach(s=>$("#t"+s).hidden=s!=k);if(k=="a")stats();if(k=="a"||k=="c")renderList()}
  if(t.dataset.rm!=null){est.splice(+t.dataset.rm,1);renderEst()}
  if(t.id=="tgl"){$("#pick").hidden=false}
  if(t.id=="add"){const a=ALU.find(x=>x.dni==$("#sa").value);if(!a)return toast("Seleccione un estudiante");if(est.some(x=>x.dni==a.dni))return toast("Ya está en la lista");est.push(toE(a));renderEst();$("#pick").hidden=auto?false:false}
  if(t.id=="save")save();if(t.id=="dp")prn(last);if(t.id=="dx")xlsx([last],"ficha_"+last.dni);if(t.id=="dn")reset();
  if(t.dataset.pick){$("#dni").value=t.dataset.pick;$("#bn").value="";$("#bl").innerHTML="";lookup()}
+ if(t.dataset.del){const x=LST.find(y=>y.dni==t.dataset.del),e=x&&x.est.find(s=>s.dni==t.dataset.de);if(e&&confirm(`¿Eliminar a ${e.apP} ${e.apM}, ${e.nom} (${e.grado} ${e.sec}) junto con su informante ${x.apP} ${x.apM}, ${x.nom} de esta fila?\n\nLos demás hijos de este informante NO se eliminan. No se puede deshacer.`)){try{const rest=x.est.filter(s=>s.dni!=e.dni);if(rest.length)await store.set("encuestas",x.dni,{...x,est:rest});else await store.del("encuestas",x.dni);if(!F)await renderList();toast("Fila eliminada")}catch(er){toast("Error: "+er.message)}}}
  if(t.dataset.pr){const x=LST.find(y=>y.dni==t.dataset.pr);if(x)prn(x)}
  if(t.dataset.xl){const x=LST.find(y=>y.dni==t.dataset.xl);if(x)xlsx([x],"ficha_"+x.dni)}
  if(t.id=="xa"){const l=await store.all("encuestas");l.length?xlsx(l.sort((a,b)=>a.ts-b.ts),"FICHA_DE_CARACTERIZACION_SOCIOLINGUISTICA"):toast("No hay encuestas")}
  if(t.id=="del"){if(prompt("Contraseña de administrador:")!==CFG.PASS)return toast("Contraseña incorrecta");if(!confirm("Se borrará TODA la base de datos y TODAS las encuestas. ¿Continuar?"))return;for(const c of["alumnos","personas","encuestas"])await store.clear(c);await loadALU();reset();stats();toast("Todo fue borrado")}});
 $("#dni").addEventListener("input",lookup);$("#bn").addEventListener("input",buscarNom);$("#g_cond").addEventListener("change",lookup);
-$("#cd").addEventListener("input",drawList);$("#sg").onchange=fillSec;$("#ss").onchange=fillAl;
+$("#cd").addEventListener("input",drawList);$("#ad").addEventListener("input",drawAdm);$("#sg").onchange=fillSec;$("#ss").onchange=fillAl;
 $("#fi").onchange=async e=>{if(e.target.files[0]){try{await importDB(e.target.files[0])}catch(x){toast("Error: "+x.message)}e.target.value=""}};
 /* ===== INICIO ===== */
 initForm();let msg="";
