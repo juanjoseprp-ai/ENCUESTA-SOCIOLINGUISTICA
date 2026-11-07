@@ -99,6 +99,8 @@ input[readonly]{background:var(--g)}
 <footer>PIP Juan Josep Ramos Pozo</footer>
 <div id="pa"></div><div id="toast"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script type="module">
 /* ===== CONFIGURACIÓN ===== */
 const CFG={UGEL:"Huanta",IE:"José Santos Figueroa",COD:"0593293",LOC:"San José de Secce",DIS:"Santillana",PASS:"admin2026" /* ← contraseña de administrador (cámbiela) */};
@@ -224,12 +226,36 @@ function buscarNom(){const q=norm($("#bn").value).split("_").filter(Boolean),b=$
 /* ===== LISTA DE INFORMANTES ===== */
 let LST=[];
 async function renderList(){if(F){if(!renderList.u)renderList.u=F.onSnapshot(F.collection(fdb,"encuestas"),s=>{LST=s.docs.map(d=>d.data()).sort((a,b)=>b.ts-a.ts);drawList()},e=>bar("Error al leer encuestas: "+e.message,1))}else{LST=(await store.all("encuestas")).sort((a,b)=>b.ts-a.ts);drawList()}}
+let LG=[];
 function drawLst(){const q=norm($("#cd").value).split("_").filter(Boolean),f=LST.filter(x=>{const t=norm(x.dni+" "+x.apP+" "+x.apM+" "+x.nom);return q.every(w=>t.includes(w))}),
  l=f.flatMap(x=>x.est.map(e=>({x,e}))).sort((a,b)=>cmpE(a.e,b.e)||a.x.ts-b.x.ts);
  $("#cn").textContent=LST.length?`${f.length} de ${LST.length} informante(s) · ${l.length} estudiante(s), ordenados por grado y sección`:"Aún no hay encuestas registradas. Aquí aparecerán a medida que se guarden.";
- let g="",n=0,s=0;
- $("#ct").innerHTML=`<tr><th>#</th><th>N.º sec.</th><th>Fecha</th><th>DNI informante</th><th>Informante</th><th>Estudiante</th><th></th></tr>`+l.map(({x,e})=>{const gk=`${e.grado} “${e.sec}”`,hd=gk!=g?(g=gk,s=0,`<tr><td colspan="7" style="background:var(--l);font-weight:700">${esc(gk)}</td></tr>`):"";
- return hd+`<tr><td>${++n}</td><td>${++s}</td><td>${fmt(x.fecha)}</td><td>${x.dni}</td><td>${esc(x.apP)} ${esc(x.apM)}, ${esc(x.nom)}<br><small>${COND[("abcdef").indexOf(x.cond)]}</small></td><td>${esc(e.apP)} ${esc(e.apM)}, ${esc(e.nom)}<br><small>DNI ${esc(e.dni)}</small></td><td style="white-space:nowrap"><button class="btn" data-pr="${x.dni}">Imprimir</button><button class="btn s" data-xl="${x.dni}">Excel</button></td></tr>`}).join("")}
+ LG=[];l.forEach(r=>{const k=`${r.e.grado} “${r.e.sec}”`;let c=LG[LG.length-1];if(!c||c.k!=k)LG.push(c={k,r:[]});c.r.push(r)});
+ let n=0;
+ $("#ct").innerHTML=`<tr><th>#</th><th>N.º sec.</th><th>Fecha</th><th>DNI informante</th><th>Informante</th><th>Estudiante</th><th></th></tr>`+LG.map((c,gi)=>{let s=0;
+ return `<tr><td colspan="7" style="background:var(--l);font-weight:700">${esc(c.k)}</td></tr>`+c.r.map(({x,e})=>`<tr><td>${++n}</td><td>${++s}</td><td>${fmt(x.fecha)}</td><td>${x.dni}</td><td>${esc(x.apP)} ${esc(x.apM)}, ${esc(x.nom)}<br><small>${COND[("abcdef").indexOf(x.cond)]}</small></td><td>${esc(e.apP)} ${esc(e.apM)}, ${esc(e.nom)}<br><small>DNI ${esc(e.dni)}</small></td><td style="white-space:nowrap"><button class="btn" data-pr="${x.dni}">Imprimir</button><button class="btn s" data-xl="${x.dni}">Excel</button></td></tr>`).join("")+`<tr><td colspan="7" style="text-align:right"><button class="btn s" data-zip="${gi}">⬇ Descargar ${esc(c.k)} en ZIP (${c.r.length} PDF)</button></td></tr>`}).join("")}
+function pdfEnc(x,e){const D=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),M=14,W=182,LH=3.5,G=[211,237,217];let y=10;
+ const f=(b,s)=>{D.setFont("helvetica",b?"bold":"normal");D.setFontSize(s)},pg=n=>{if(y+n>284){D.addPage();y=14}};
+ try{D.addImage(LOGO,"PNG",M,8,15,18.4)}catch(_){}
+ f(0,8);D.text("GOBIERNO REGIONAL DE AYACUCHO",105,12,{align:"center"});f(1,9);D.text("DIRECCIÓN REGIONAL DE EDUCACIÓN DE AYACUCHO",105,16.5,{align:"center"});f(0,8);D.text("DIRECCIÓN DE GESTIÓN PEDAGÓGICA",105,20.5,{align:"center"});f(1,8);D.text("“Año de la esperanza y fortalecimiento de la democracia”",105,25,{align:"center"});
+ f(1,11);D.text("ENCUESTA DE CARACTERIZACIÓN SOCIOLINGÜÍSTICA – 2026",105,34,{align:"center"});y=38;
+ const ox=(o,v,l)=>o.map((t,i)=>`${v==l[i]?"[X]":"[  ]"} ${l[i]}) ${t}`).join("   ");
+ const row=(a,b)=>{const w1=52,L=D.splitTextToSize(String(b),W-w1-3),h=Math.max(6,L.length*LH+2.6);pg(h);D.setFillColor(...G);D.rect(M,y,w1,h,"FD");D.rect(M+w1,y,W-w1,h);f(1,8);D.text(a,M+1.5,y+4);f(0,8);D.text(L,M+w1+1.5,y+4);y+=h};
+ row("UGEL / institución educativa",`${CFG.UGEL} – “${CFG.IE}”  (Cód. modular ${CFG.COD})`);row("Comunidad, localidad, distrito",`${CFG.LOC} - ${CFG.DIS}`);row("Código de encuesta / fecha",`${x.codigo} / ${fmt(x.fecha)}`);
+ row("Condición del informante",ox(COND,x.cond,"abcdef"));row("DNI del informante",x.dni);row("Apellidos y nombres del informante",`${x.apP} ${x.apM}, ${x.nom}`);row("Grupo de edad",ox(EDAD,x.edad,"abc"));row("Sexo del informante",ox(SEXO,x.sexo,"ab"));
+ y+=3;const cols=[100,30,52],hd=["APELLIDOS Y NOMBRES DEL ESTUDIANTE","DNI","GRADO Y SECCIÓN"],vs=[`${e.apP} ${e.apM}, ${e.nom}`,e.dni,`${e.grado} ${e.sec}`];
+ pg(14);let cx=M;cols.forEach((w,i)=>{D.setFillColor(...G);D.rect(cx,y,w,6,"FD");f(1,7.5);D.text(hd[i],cx+1.5,y+4);cx+=w});y+=6;cx=M;cols.forEach((w,i)=>{D.rect(cx,y,w,6);f(0,8);D.text(String(vs[i]),cx+1.5,y+4);cx+=w});y+=9;
+ Q.forEach((q,i)=>{const s=SEC.find(z=>z[0]==i);if(s){pg(16);D.setFillColor(...G);D.rect(M,y,W,6,"F");f(1,8.5);D.text(s[1],M+1.5,y+4.2);y+=8}
+  f(1,8.3);const L=D.splitTextToSize(`${i+1}. ${q[0]}`,W),ex=q[2]&&x["x"+(i+1)]?D.splitTextToSize("Especifica: "+x["x"+(i+1)],W-8):[];
+  pg(L.length*3.7+q[1].length*3.4+ex.length*3.4+3);D.text(L,M,y+3);y+=L.length*3.7+0.5;
+  q[1].forEach((o,j)=>{const sel=x.r[i+1]=="abcd"[j];f(sel,7.8);const OL=D.splitTextToSize(`${sel?"[X]":"[  ]"} ${"abcd"[j]}) ${o}`,W-8);D.text(OL,M+5,y+3);y+=OL.length*3.4});
+  if(ex.length){f(0,7.8);D.text(ex,M+5,y+3);y+=ex.length*3.4}y+=1.8});
+ pg(36);y+=3;f(1,8.5);D.text("CONFORMIDAD DEL REGISTRO",M,y+3);y+=20;D.setDrawColor(0);D.line(M+8,y,M+78,y);D.line(M+W-78,y,M+W-8,y);f(0,8);D.text("Firma o huella del informante",M+43,y+4,{align:"center"});D.text(`DNI ${x.dni}`,M+43,y+8,{align:"center"});D.text("Firma del aplicador/a",M+W-43,y+4,{align:"center"});
+ const n=D.getNumberOfPages();for(let p=1;p<=n;p++){D.setPage(p);f(0,7);D.text(`${x.codigo}  ·  Página ${p} de ${n}`,105,291,{align:"center"})}
+ return D}
+const safe=s=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_|_$/g,"");
+async function zipSec(c){const z=new JSZip();let i=0;for(const{x,e}of c.r)z.file(`${String(++i).padStart(2,"0")}_${safe(e.apP+" "+e.apM+" "+e.nom)}_${e.dni}.pdf`,pdfEnc(x,e).output("arraybuffer"));
+ const a=document.createElement("a");a.href=URL.createObjectURL(await z.generateAsync({type:"blob"}));a.download="encuestas_"+safe(c.k)+".zip";document.body.appendChild(a);a.click();a.remove()}
 function drawAdm(){const q=norm($("#ad").value).split("_").filter(Boolean),f=LST.filter(x=>{const t=norm(x.dni+" "+x.apP+" "+x.apM+" "+x.nom);return q.every(w=>t.includes(w))}),l=f.flatMap(x=>x.est.map(e=>({x,e}))).sort((a,b)=>cmpE(a.e,b.e)||a.x.ts-b.x.ts);
  $("#an").textContent=LST.length?`${f.length} de ${LST.length} informante(s) · ${l.length} fila(s), ordenadas por grado y sección`:"No hay registros guardados.";
  let g="",n=0,s=0;
@@ -249,6 +275,7 @@ document.addEventListener("click",async e=>{const t=e.target;
  if(t.dataset.del){const x=LST.find(y=>y.dni==t.dataset.del),e=x&&x.est.find(s=>s.dni==t.dataset.de);if(e&&confirm(`¿Eliminar a ${e.apP} ${e.apM}, ${e.nom} (${e.grado} ${e.sec}) junto con su informante ${x.apP} ${x.apM}, ${x.nom} de esta fila?\n\nLos demás hijos de este informante NO se eliminan. No se puede deshacer.`)){try{const rest=x.est.filter(s=>s.dni!=e.dni);if(rest.length)await store.set("encuestas",x.dni,{...x,est:rest});else await store.del("encuestas",x.dni);if(!F)await renderList();toast("Fila eliminada")}catch(er){toast("Error: "+er.message)}}}
  if(t.dataset.ed){const x=LST.find(y=>y.dni==t.dataset.ed);if(x)startEdit(x)}
  if(t.id=="ec"||t.id=="db"){reset();goTab("a")}
+ if(t.dataset.zip!=null){const c=LG[+t.dataset.zip],tx=t.textContent;if(c){t.disabled=true;t.textContent="Generando…";try{await zipSec(c)}catch(er){toast("Error: "+er.message)}t.disabled=false;t.textContent=tx}}
  if(t.dataset.pr){const x=LST.find(y=>y.dni==t.dataset.pr);if(x)prn(x)}
  if(t.dataset.xl){const x=LST.find(y=>y.dni==t.dataset.xl);if(x)xlsx([x],"ficha_"+x.dni)}
  if(t.id=="xa"){const l=await store.all("encuestas");l.length?xlsx(l.sort((a,b)=>a.ts-b.ts),"FICHA_DE_CARACTERIZACION_SOCIOLINGUISTICA"):toast("No hay encuestas")}
